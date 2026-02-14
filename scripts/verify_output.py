@@ -2,58 +2,94 @@ import json
 import sys
 from pathlib import Path
 
+REQUIRED_TOP_LEVEL = ["implemented_features", "qa", "demo"]
+
 def fail(msg: str):
     print(f"VERIFY_FAIL: {msg}")
     sys.exit(1)
+
+def is_non_empty_str(x) -> bool:
+    return isinstance(x, str) and len(x.strip()) > 0
 
 def main():
     if len(sys.argv) != 2:
         fail("Usage: verify_output.py <artifacts/sanity_output.json>")
 
     path = Path(sys.argv[1])
-    data = json.loads(path.read_text())
+    if not path.exists():
+        fail(f"File not found: {path}")
 
-    # Required fields
-    for k in ["implemented_features", "demo", "qa"]:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as e:
+        fail(f"Invalid JSON: {e}")
+
+    for k in REQUIRED_TOP_LEVEL:
         if k not in data:
-            fail(f"Missing key: {k}")
+            fail(f"Missing top-level key: {k}")
 
-    # Must demonstrate upload->index->ask with citations for Feature A if claimed
-    feats = set(data.get("implemented_features", []))
-    qa = data.get("qa", [])
+    feats = data.get("implemented_features")
+    if not isinstance(feats, list):
+        fail("implemented_features must be a list like ['A','B']")
 
-    if "A" in feats:
-        if not qa:
-            fail("Feature A claimed but qa list is empty.")
+    feat_set = set(feats)
 
-        # Each QA must include citations
+    qa = data.get("qa")
+    if not isinstance(qa, list):
+        fail("qa must be a list")
+
+    demo = data.get("demo")
+    if not isinstance(demo, dict):
+        fail("demo must be an object")
+
+    # If Feature A is claimed, enforce citations
+    if "A" in feat_set:
+        if len(qa) == 0:
+            fail("Feature A claimed but qa is empty")
+
         for i, item in enumerate(qa):
-            if "question" not in item or "answer" not in item:
-                fail(f"QA[{i}] missing question/answer")
-            cites = item.get("citations", [])
-            if not isinstance(cites, list) or len(cites) == 0:
-                fail(f"QA[{i}] has no citations")
-            # Minimal citation structure
-            for c in cites:
-                if not isinstance(c, dict):
-                    fail(f"QA[{i}] citation must be object")
-                for req in ["source", "locator", "snippet"]:
-                    if req not in c:
-                        fail(f"QA[{i}] citation missing {req}")
+            if not isinstance(item, dict):
+                fail(f"qa[{i}] must be an object")
 
-    # Memory file checks if Feature B claimed
-    if "B" in feats:
-        # Candidate should append to these paths
+            if not is_non_empty_str(item.get("question")):
+                fail(f"qa[{i}].question missing/empty")
+
+            if not is_non_empty_str(item.get("answer")):
+                fail(f"qa[{i}].answer missing/empty")
+
+            citations = item.get("citations")
+            if not isinstance(citations, list) or len(citations) == 0:
+                fail(f"qa[{i}] must include non-empty citations[]")
+
+            for j, c in enumerate(citations):
+                if not isinstance(c, dict):
+                    fail(f"qa[{i}].citations[{j}] must be an object")
+                if not is_non_empty_str(c.get("source")):
+                    fail(f"qa[{i}].citations[{j}].source missing/empty")
+                if not is_non_empty_str(c.get("locator")):
+                    fail(f"qa[{i}].citations[{j}].locator missing/empty (page/section/chunk id)")
+                if not is_non_empty_str(c.get("snippet")):
+                    fail(f"qa[{i}].citations[{j}].snippet missing/empty")
+
+    # If Feature B is claimed, require memory writes info
+    if "B" in feat_set:
         user_mem = Path("USER_MEMORY.md")
         comp_mem = Path("COMPANY_MEMORY.md")
         if not user_mem.exists() or not comp_mem.exists():
-            fail("Feature B claimed but memory files missing")
+            fail("Feature B claimed but USER_MEMORY.md / COMPANY_MEMORY.md not found")
 
-        # must show at least one memory write recorded in sanity output
-        demo = data.get("demo", {})
-        mem_writes = demo.get("memory_writes", [])
+        mem_writes = demo.get("memory_writes")
         if not isinstance(mem_writes, list) or len(mem_writes) == 0:
-            fail("Feature B claimed but demo.memory_writes empty")
+            fail("Feature B claimed but demo.memory_writes is empty")
+
+        # Optional: basic structure checks
+        for i, w in enumerate(mem_writes):
+            if not isinstance(w, dict):
+                fail(f"demo.memory_writes[{i}] must be an object")
+            if w.get("target") not in ("USER", "COMPANY"):
+                fail(f"demo.memory_writes[{i}].target must be 'USER' or 'COMPANY'")
+            if not is_non_empty_str(w.get("summary")):
+                fail(f"demo.memory_writes[{i}].summary missing/empty")
 
     print("VERIFY_OK")
 

@@ -1,42 +1,57 @@
 # Architecture Overview
 
-## Overview
-This system implements:
-- **Ingestion:** file parsing → chunking → embedding/indexing
-- **Retrieval:** query → search (vector and/or BM25) → optional rerank
-- **Answering:** LLM generates response strictly from retrieved context + returns citations
-- **Memory:** selective extraction writes durable knowledge into markdown files
+## Goal
+Provide a brief, readable overview of how your chatbot works:
+- ingestion
+- indexing
+- retrieval + grounding with citations
+- memory writing
+- optional safe tool execution
 
-## Components
-### 1) Ingestion
-- Input formats: (e.g., PDF/HTML/TXT)
-- Chunking strategy: (section-aware / fixed size / semantic)
-- Metadata tracked: (source file, page, section, chunk_id)
+Keep this short (1–2 pages).
 
-### 2) Index / Storage
-- Vector store: (FAISS/Chroma/pgvector/etc)
-- Optional lexical index: (BM25)
-- Persistence: (local disk / sqlite / postgres)
+---
 
-### 3) Retrieval + Grounding
-- Retrieval method: (top-k, filters)
-- Citation format: how citations map to chunks/pages/sections
-- Failure behavior: what happens when retrieval is empty/low confidence
+## High-Level Flow
 
-### 4) Memory
-- Decision policy: what qualifies as “high-signal”
-- Safety: excludes secrets/sensitive info
-- Output targets:
+### 1) Ingestion (Upload → Parse → Chunk)
+- Supported inputs:
+- Parsing approach:
+- Chunking strategy:
+- Metadata captured per chunk (recommended):
+  - source filename
+  - page/section (if available)
+  - chunk_id
+
+### 2) Indexing / Storage
+- Vector store choice (FAISS/Chroma/pgvector/etc):
+- Persistence:
+- Optional lexical index (BM25):
+
+### 3) Retrieval + Grounded Answering
+- Retrieval method (top-k, filters, reranking):
+- How citations are built:
+  - citation includes: source, locator (page/section), snippet
+- Failure behavior:
+  - what happens when retrieval is empty/low confidence
+
+### 4) Memory System (Selective)
+- What counts as “high-signal” memory:
+- What you explicitly do NOT store (PII/secrets/raw transcript):
+- How you decide when to write:
+- Format written to:
   - `USER_MEMORY.md`
   - `COMPANY_MEMORY.md`
 
-### 5) Optional Sandbox Tooling
-- Tool interface for Open-Meteo
-- Isolation boundaries (how code execution is restricted)
-- Rate limiting / timeouts
+### 5) Optional: Safe Tooling (Open-Meteo)
+- Tool interface shape:
+- Safety boundaries:
+  - timeouts
+  - restricted imports / sandbox isolation
+  - network access rules (if applicable)
 
-## Tradeoffs
-- Why you chose your chunking strategy
-- Why you chose your vector store
-- How you balanced correctness vs simplicity
-- What you would improve next
+---
+
+## Tradeoffs & Next Steps
+- Why this design?
+- What you would improve with more time:
