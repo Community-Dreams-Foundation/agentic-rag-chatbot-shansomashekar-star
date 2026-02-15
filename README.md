@@ -48,8 +48,6 @@ You may implement one feature or multiple. Partial implementations are acceptabl
 - Full Name:
 - Email:
 - GitHub Username:
-- Team Name (if any):
-- Timezone (optional):
 
 ---
 
