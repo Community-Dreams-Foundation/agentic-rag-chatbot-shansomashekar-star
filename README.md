@@ -8,15 +8,15 @@
 
 | Field | Value |
 |-------|-------|
-| Full Name | [NAME] |
-| Email | [EMAIL] |
-| GitHub Username | [GITHUB] |
+| Full Name | [Shanmuganathan Somashekar] |
+| Email | [shan.somashekar@gmail.com  ] |
+| GitHub Username | [somashekar-star] |
 
 ---
 
 ## Video Walkthrough
 
-[PASTE LINK HERE]
+
 
 ---
 
