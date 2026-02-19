@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Chat — Document AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app">
+        <header class="header" id="header">
+            <div class="logo">
+                <span class="logo-icon">◇</span>
+                <span class="logo-text">RAG Chat</span>
+            </div>
+            <div class="header-actions">
+                <span id="doc-count" class="doc-count" title="Indexed documents"></span>
+                <span id="user-display" class="user-badge"></span>
+                <button id="logout-btn" class="btn-ghost" style="display:none">Sign out</button>
+                <span id="model-badge" class="model-badge">Ollama</span>
+                <div id="status-badge" class="status-dot" title="Ollama status"></div>
+            </div>
+        </header>
+
+        <main class="main" id="main-panel" style="display:none">
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3 class="section-title">Documents</h3>
+                    <div class="upload-zone" id="upload-zone">
+                        <div class="upload-icon">↑</div>
+                        <p class="upload-text">Drop files here or click to upload</p>
+                        <p class="upload-hint">PDF, TXT, MD, HTML</p>
+                        <input type="file" id="file-input" accept=".pdf,.txt,.md,.html,.htm" hidden>
+                    </div>
+                    <ul id="doc-list" class="doc-list"></ul>
+                    <div id="doc-empty" class="empty-state">
+                        <p>No documents yet</p>
+                        <p class="empty-hint">Upload a file to get started</p>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="chat-panel">
+                <div id="chat-history" class="chat-history">
+                    <div id="chat-welcome" class="welcome">
+                        <div class="welcome-icon">◇</div>
+                        <h2>Document-grounded answers</h2>
+                        <p>Every answer is cited from your uploaded documents. No hallucinations — only what's in your files.</p>
+                        <div class="welcome-hints">
+                            <span>"Summarize the main points"</span>
+                            <span>"What does this say about X?"</span>
+                            <span>"Find information on..."</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-bar">
+                    <textarea id="user-input" placeholder="Ask about your documents..." rows="1"></textarea>
+                    <button id="send-btn" class="btn-send" aria-label="Send">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                    </button>
+                </div>
+            </section>
+
+            <aside class="right-sidebar">
+                <div class="sidebar-section">
+                    <h3 class="section-title">Right Panel</h3>
+                    <div class="tabs">
+                        <button class="tab active" data-tab="user">User</button>
+                        <button class="tab" data-tab="company">Company</button>
+                        <button class="tab" data-tab="graph">Knowledge Graph</button>
+                    </div>
+                    <div id="user-mem" class="tab-content active"></div>
+                    <div id="company-mem" class="tab-content"></div>
+                    <div id="graph-panel" class="tab-content">
+                        <div id="graph-container" class="graph-container"></div>
+                        <div id="graph-empty" class="empty-state small">
+                            <p>No graph yet. Upload documents to build.</p>
+                        </div>
+                    </div>
+                    <div id="mem-empty" class="empty-state small">
+                        <p>Nothing stored yet</p>
+                    </div>
+                </div>
+                <div class="latency" id="latency"></div>
+            </aside>
+        </main>
+
+        <div id="login-screen" class="login-screen">
+            <div class="login-card">
+                <h1>RAG Chat</h1>
+                <p class="login-subtitle">Document AI with memory. Ask questions, get cited answers.</p>
+                <form class="login-form" id="login-form-full">
+                    <input type="text" id="username" placeholder="Username" autocomplete="username">
+                    <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+                    <button type="button" id="login-btn" class="btn-primary full">Sign in</button>
+                    <button type="button" id="register-btn" class="btn-ghost full">Create account</button>
+                </form>
+                <p id="login-error" class="login-error"></p>
+            </div>
+        </div>
+    </div>
+    <div id="toast" class="toast"></div>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>

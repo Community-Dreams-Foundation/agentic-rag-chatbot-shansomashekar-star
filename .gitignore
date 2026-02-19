@@ -1,0 +1,25 @@
+# Env and secrets
+.env
+
+# Generated / runtime
+artifacts/
+data/
+memory/
+vectorstore/
+uvicorn.log
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+venv/
+.venv/
+
+# Node
+node_modules/
+frontend/dist/
